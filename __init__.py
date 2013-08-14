@@ -14,7 +14,7 @@ headers['Content-type'] = 'text/plain;charset=utf-8'
 
 import data, cookie, auth, cgi, os
 form = cgi.FieldStorage(keep_blank_values=1)
-params = {a: form[a].value for a in form.keys()}
+params = {a: form[a].value for a in form.keys() if not form[a].filename}
 if 'SERVER_NAME' in os.environ:
 	pathkeys = (os.environ['REDIRECT_URL'] if 'REDIRECT_URL' in os.environ else os.environ['REQUEST_URI'] if 'REQUEST_URI' in os.environ else '')[1:]
 	pathkeys = pathkeys.split('?', 1)[0].split('/')
@@ -37,7 +37,6 @@ def checkKeys(item, *args):
 	except:
 		return False
 	return True
-
 
 def enableDebug():
 	global debugging
