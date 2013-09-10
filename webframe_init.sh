@@ -53,11 +53,24 @@ echo -n "//Javascript document
 echo "-data/style.css"
 echo -n "/* Main CSS document */
 
+html, body {
+	height: 100%;
+	margin: 0px;
+	padding: 0px;
+}
+
 body {
 	background-color: #DDD;
 	font-family: sans-serif;
 	color: black;
 	text-align: center;
+}
+
+#container {
+	min-height: 100%;
+	height: auto !important;
+	height: 100%;
+	margin-bottom: -3em;
 }
 
 header {
@@ -69,7 +82,7 @@ header {
 
 main {
 	display: block;
-	margin: 0px auto;
+	margin: 0px auto 20px;
 	background-color: white;
 	padding: 10px;
 	border-radius: 7px;
@@ -89,26 +102,29 @@ a:hover {
 }
 a:active { color: #222; }
 
+#push { height: 3em; }
+
 footer {
 	display: block;
 	font-size: .6em;
 	color: #888;
 	background-color: white;
-	position: absolute;
-	bottom: 0px;
-	left: 0px;
-	right: 0px;
-	padding: 20px;
+	padding: 2em 0px;
+	width: 100%;
+	height: 1em;
 }
 " > data/style.css
 
 echo "-data/template/site.html.pyt"
-echo -n "<header>
+echo -n "<div id=\"container\">
+<header>
 Default Webframe Site
 </header>
 <main>
 {{content}}
 </main>
+<div id=\"push\"></div>
+</div>
 <footer>
 &copy; Copyright 2013 <a href="http://andrewdutcher.com">Andrew Dutcher</a>. Site powered by <a href="https://github.com/rhelmot/webframe">webframe</a>.
 </footer>

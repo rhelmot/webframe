@@ -15,9 +15,13 @@ year = 365*day
 
 timeout = hour
 
-with open('data/sensitive/ckeys') as fd:
-	secretServerKey = fd.readline()[:-1]
-	otherServerKey = fd.readline()[:-1]
+try:
+	with open('data/sensitive/ckeys') as fd:
+		secretServerKey = fd.readline()[:-1]
+		otherServerKey = fd.readline()[:-1]
+except:
+	secretServerKey = '0123456789ABCDEF'
+	otherServerKey = 'FEDCBA9876543210'
 
 def genTokenSimple(tokenString):
 	return AES.new(ipv4Key(), AES.MODE_CBC, secretServerKey).encrypt(timeStr() + pad16(tokenString)).encode('base64')[:-1].encode('rot13')

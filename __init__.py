@@ -133,11 +133,9 @@ def site():
 	global documentTitle, documentScripts, rawScript, documentCss, documentContent, documentErrors, headers, debugging, debugMsgs, docroot, responseCode
 	addRawScript('var basePath = "' + docroot[:-1] + '";')
 	iswebpage = (('Content-type' in headers) and (headers['Content-type'] == 'text/html'))
-	#debug(str(cookie.cookies))
 	if data.connection:
 		data.connection.close()
-	#headers['Content-length'] = len(documentContent)
-	print 'Status: ' + responseCode
+	print 'Status: ' + str(responseCode)
 	print ''.join([key + ': ' + str(headers[key]) + '\n' for key in headers.keys()])
 	if not iswebpage:
 		print documentContent
