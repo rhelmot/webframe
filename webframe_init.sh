@@ -22,7 +22,7 @@ ln -s ../$WEBFLIBPATH data/lib
 echo "Generating base-functionality files..."
 
 echo "-index.py"
-echo -n "#!/usr/bin/python2.7
+echo -n "#!/opt/python27/bin/python2.7
 # -*- coding: utf-8 -*-
 #  index.py
 
