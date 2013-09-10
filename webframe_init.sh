@@ -179,7 +179,7 @@ echo -n "#!/bin/sh
 GIT_WORK_TREE=../ git checkout -f
 " > .git/hooks/post-receive
 chmod +x .git/hooks/post-receive
-git add . > /dev/null
+git add index.py .htaccess data > /dev/null
 git commit -m 'Initial webframe autocommit' > /dev/null
 
 # Finished! Print clone info
