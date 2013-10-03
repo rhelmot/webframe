@@ -36,9 +36,8 @@ def main():
 	webframe.addHeader('Content-type', 'text/html')
 	webframe.setTitle('Hello, webframe!');
 	webframe.addCss('/data/style.css')
-	webframe.addScript('/data/lib/util.js')
 	webframe.addScript('/data/script/script.js')
-	webframe.addContent(webframe.template('data/template/site.html.pyt', {'content': 'Hello, world!'}))
+	webframe.addContent(webframe.util.template('data/template/site.html.pyt', {'content': 'Hello, world!'}))
 	webframe.site()
 
 if __name__ == '__main__':
@@ -126,7 +125,7 @@ Default Webframe Site
 <div id=\"push\"></div>
 </div>
 <footer>
-&copy; Copyright 2013 <a href="http://andrewdutcher.com">Andrew Dutcher</a>. Site powered by <a href="https://github.com/rhelmot/webframe">webframe</a>.
+&copy; Copyright 2013 <a href=\"http://andrewdutcher.com\">Andrew Dutcher</a>. Site powered by <a href=\"https://github.com/rhelmot/webframe\">webframe</a>.
 </footer>
 " > data/template/site.html.pyt
 
@@ -137,6 +136,7 @@ echo "Writing .htaccess files..."
 echo "-./"
 echo -n "AddHandler cgi-script .py
 RewriteEngine on
+RewriteRule \.git - [F]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^.*$ index.py [L]

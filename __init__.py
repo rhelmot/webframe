@@ -1,6 +1,12 @@
+import cgi, os
+
+form = cgi.FieldStorage(keep_blank_values=1)
+params = {a: form[a].value for a in form.keys() if not form[a].filename}
+
 debugging = False
 debugMsgs = []
 
+permission = False
 documentTitle = 'Untitled Document'
 documentScripts = []
 rawScript = ''
@@ -8,35 +14,10 @@ documentCss = []
 documentContent = ''
 documentErrors = []
 headers = {}
+
 responseCode = '200'
+headers['Content-type'] = ['text/plain;charset=utf-8']
 
-headers['Content-type'] = 'text/plain;charset=utf-8'
-
-import data, cookie, auth, cgi, os
-form = cgi.FieldStorage(keep_blank_values=1)
-params = {a: form[a].value for a in form.keys() if not form[a].filename}
-if 'SERVER_NAME' in os.environ:
-	pathkeys = (os.environ['REDIRECT_URL'] if 'REDIRECT_URL' in os.environ else os.environ['REQUEST_URI'] if 'REQUEST_URI' in os.environ else '')[1:]
-	pathkeys = pathkeys.split('?', 1)[0].split('/')
-	if pathkeys[-1] == '':
-		pathkeys = pathkeys[:-1]
-	docroot = 'http://' + os.environ['SERVER_NAME']
-	if os.environ['SERVER_PORT'] != '80':
-		docroot += ':' + os.environ['SERVER_PORT']
-	docroot += '/'
-else:
-	docroot = '/'
-	pathkeys = []
-permission = False
-
-
-def checkKeys(item, *args):
-	try:
-		for i in args:
-			item[i]
-	except:
-		return False
-	return True
 
 def enableDebug():
 	global debugging
@@ -47,59 +28,6 @@ def enableDebug():
 def debug(msg):
 	global debugMsgs
 	debugMsgs += [msg]
-
-templateCache = {}
-
-def template(file, vars, cache=False):
-	global templateCache
-	if cache and file in templateCache:
-		buf = templateCache[file]
-	else:
-		buf = file if '{{' in file else open(file).read()
-		if cache:
-			templateCache['file'] = buf
-	for var, val in vars.iteritems():
-		buf = buf.replace('{{' + str(var) + '}}', str(val))
-	ifstat = False
-	def stripTag(buf, startindex, conditionMet):
-		if conditionMet:
-			buf = buf[:startindex] + buf[buf.index('}}', startindex)+2:]
-		else:
-			buf = buf[:startindex] + buf[buf.index('{{', startindex+2):]
-		return buf
-	def meetCond(cstring):
-		cond = cstring.split('=', 1)
-		return not ((not cond[0] in vars) or (len(cond) == 1 and (vars[cond[0]] == False or vars[cond[0]] == '')) or (len(cond) == 2 and not str(vars[cond[0]]) == cond[1]))
-	while '{{~' in buf:
-		perp = buf.index('{{~')
-		direc = perp + 3
-		endirec = buf.index('}}')
-		if buf[direc:direc+3] == 'if ':
-			if meetCond(buf[direc+3:endirec]):
-				ifstat = False
-				buf = stripTag(buf, perp, True)
-			else:
-				ifstat = True
-				buf = stripTag(buf, perp, False)
-		elif buf[direc:direc+5] == 'elif ':
-			if ifstat:
-				if meetCond(buf[direc+5:endirec]):
-					ifstat = False
-					buf = stripTag(buf, perp, True)
-				else:
-					ifstat = True
-					buf = stripTag(buf, perp, False)
-			else:
-				buf = stripTag(buf, perp, False)
-		elif buf[direc:direc+4] == 'else':
-			if ifstat:
-				buf = stripTag(buf, perp, True)
-				ifstat = False
-			else:
-				buf = stripTag(buf, perp, False)
-		elif buf[direc:direc+5] == 'endif':
-			buf = stripTag(buf, perp, True)
-	return buf
 
 def addHeader(key, val):
 	global headers
@@ -156,3 +84,36 @@ def site():
 	if len(documentErrors) != 0:
 		print '</div>'
 	print '</body>\n</html>'
+
+
+
+
+import data, cookie, auth, util
+
+if 'SERVER_NAME' in os.environ:
+	hostname = os.environ['SERVER_NAME']
+	if len(hostname) > 4 and hostname[:4] == 'dev.':
+		enableDebug()
+	pathkeys = (os.environ['REDIRECT_URL'] if 'REDIRECT_URL' in os.environ else os.environ['REQUEST_URI'] if 'REQUEST_URI' in os.environ else '')[1:]
+	pathkeys = pathkeys.split('?', 1)[0].split('/')
+	if pathkeys[-1] == '':
+		pathkeys = pathkeys[:-1]
+	docroot = 'http://' + os.environ['SERVER_NAME']
+	if os.environ['SERVER_PORT'] != '80':
+		docroot += ':' + os.environ['SERVER_PORT']
+	docroot += '/'
+else:
+	docroot = '/'
+	pathkeys = []
+	hostname = 'localhost'
+
+
+###DEPRECATED FUNCTIONS
+
+def template(*args):
+	webframe.debug('Deprecation warning: use webframe.util.template instead of webframe.template')
+	return util.template(*args)
+
+def checkKeys(*args):
+	webframe.debug('Deprecation warning: use webframe.util.checkKeys instead of webframe.checkKeys')
+	return util.checkKeys(*args)

@@ -18,7 +18,7 @@ def query(string, args=False):
 				args = {'0': args}
 			if isinstance(args, list) or isinstance(args, tuple):
 				args = {str(a): b for a, b in enumerate(args)}
-			string = webframe.template(string, {a: nq(b) for a,b in args.iteritems()})
+			string = webframe.util.template(string, {a: nq(b) for a,b in args.iteritems()})
 		#webframe.addContent('Query: ' + string + '\n')
 		cursor.execute(string)
 	except MySQLdb.Error, e:
