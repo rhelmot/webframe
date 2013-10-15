@@ -111,9 +111,9 @@ else:
 ###DEPRECATED FUNCTIONS
 
 def template(*args):
-	webframe.debug('Deprecation warning: use webframe.util.template instead of webframe.template')
+	debug('Deprecation warning: use webframe.util.template instead of webframe.template')
 	return util.template(*args)
 
 def checkKeys(*args):
-	webframe.debug('Deprecation warning: use webframe.util.checkKeys instead of webframe.checkKeys')
+	debug('Deprecation warning: use webframe.util.checkKeys instead of webframe.checkKeys')
 	return util.checkKeys(*args)
