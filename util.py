@@ -54,7 +54,7 @@ def template(file, vars, cache=False):
 def urlTitle(title):
 	title = title.lower()
 	title = title.replace(' ', '-')
-	title = title.translate(None, '!@#$%^&*()+={}[],.<>/\|~`:;"')
+	title = title.translate(None, '!@#$%^&*()+={}[],<>/\\|~`:;"')
 	if len(title) > 80:
 		title = title[:80]
 	return title
