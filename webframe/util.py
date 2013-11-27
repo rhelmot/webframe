@@ -15,15 +15,15 @@ def template(file, vars, cache=False):
                 if conditionMet: 
                         buf = buf[:startindex] + buf[buf.index('}}', startindex)+2:] 
                 else: 
-                        buf = buf[:startindex] + buf[buf.index('{{', startindex+2):] 
+                        buf = buf[:startindex] + buf[buf.index('{{~', startindex+2):] 
                 return buf 
         def meetCond(cstring): 
                 cond = cstring.split('=', 1) 
-                return not ((not cond[0] in vars) or (len(cond) == 1 and (vars[cond[0]] == False or vars[cond[0]] == '')) or (len(cond) == 2 and not str(vars[cond[0]]) == cond[1])) 
+                return not ((not cond[0] in vars) or (len(cond) == 1 and (vars[cond[0]] == False or vars[cond[0]] == '' or vars[cond[0]] is None or vars[cond[0]] == 'False')) or (len(cond) == 2 and not str(vars[cond[0]]) == cond[1])) 
         while '{{~' in buf: 
                 perp = buf.index('{{~') 
                 direc = perp + 3 
-                endirec = buf.index('}}') 
+                endirec = buf.index('}}', perp) 
                 if buf[direc:direc+3] == 'if ': 
                         if meetCond(buf[direc+3:endirec]): 
                                 ifstat = False 

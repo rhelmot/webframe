@@ -9,12 +9,14 @@ def connect(name):
 		connection = MySQLdb.connect(fd.readline()[:-1], fd.readline()[:-1], fd.readline()[:-1], 'dutcher_'+name)
 	cursor = connection.cursor(MySQLdb.cursors.DictCursor)
 
-def query(string, args=False):
+def query(string, *args):
 	global cursor
 	import webframe
 	try:
-		if args is not False:
-			if isinstance(args, str) or isinstance(args, int):
+		if len(args) > 0:
+			if len(args) == 1:
+				args = args[0]
+			if isinstance(args, basestring) or isinstance(args, __import__('numbers').Number):
 				args = {'0': args}
 			if isinstance(args, list) or isinstance(args, tuple):
 				args = {str(a): b for a, b in enumerate(args)}
@@ -36,8 +38,8 @@ def getRows():
 	global cursor
 	return cursor.fetchall()
 
-def getQuery(string, args=False):
-	res = query(string, args)
+def getQuery(string, *args):
+	res = query(string, *args)
 	return getRows() if res else res
 
 def nq(string, char='"'):

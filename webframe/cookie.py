@@ -3,9 +3,13 @@
 
 import urllib, os, datetime
 cookies = {}
-if 'HTTP_COOKIE' in os.environ:
-	cookies = {urllib.unquote_plus(item.split('=', 1)[0]): urllib.unquote_plus(item.split('=', 1)[1]) for item in os.environ['HTTP_COOKIE'].split('; ')}
+def reload():
+	global cookies
+	if 'HTTP_COOKIE' in os.environ:
+		cookies = {urllib.unquote_plus(item.split('=', 1)[0]): urllib.unquote_plus(item.split('=', 1)[1]) for item in os.environ['HTTP_COOKIE'].split('; ')}
+reload()
 
+	
 def setCookie(name, value, expires=False, path='/', domain=False, comment=False):
 	cookies[name] = value
 	import webframe

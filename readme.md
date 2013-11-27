@@ -9,13 +9,13 @@ If I were to say something about "the purpose of webframe is to provide an unobt
 Organization
 ------------
 
-Webframe is designed to run behind apache as Python CGI, although I may expand that in the future when I have more platforms to deal with. Webframe encourages (and requires, at least to some degree) a specific site structure with the following elements:
+Webframe is designed to run either behind apache as Python CGI or as its own server, though that part is a little shaky at the moment. It either strongly recommends or requires the following design tennants:
 
-- Each site runs out of a folder and all nondata requests are served by index.py with some help from .htaccess
+- Each site runs out of a folder and all nondata requests are served by index.py
 - Each site has a `data/` folder which contains the static data needed for rendering the site, with the exception of the data/user folder which can hold file uploads and such.
 - `data/lib` is symlinked to a basic library that you can reuse for all your sites, containing at the very least a python/ directory (added to your pythonpath at runtime) which contains the webframe package.
 - MySQL as the database
-- You work seperately from your dev/production servers and update them through git
+- You work seperately from your servers and update them through git
 
 Setup
 -----
@@ -41,8 +41,8 @@ Webframe has an easy-to-use templating system. Here is an overview of its featur
 - `webframe.util.template( (<template string> | <path to template file>), <content dict>, cache=False)`
 - `{{keyname}}` will be replaced with `value` if the dict contains `'keyname': 'value'`
 - `{{~if auth=admin}}Controls{{~elif auth}}Logged in{{~else}}Anonymous{{~endif}}` yields different values depending on the value of `auth` in the content dict
--- All values are truthy except for `False` and `''`
--- `{{~if` blocks do not nest
+-- All values are truthy except for `False`, `"False"`, `None`, `0`, and `''`
+-- `{{~if}}` blocks do not nest
 -- No logical operations or tests other than equality are supported
 - If you're loading the same template file many times, set the third argument to `True` to cache its value
 
@@ -51,8 +51,8 @@ Databases
 
 - Provide database information to init script
 - Initialize with `webframe.data.connect(<database name>)`
-- `webframe.data.query()` runs a query (False on failure) whose results can be accessed through `webframe.data.getRow()` and `webframe.data.getAll()`
-- `webframe.data.getQuery()` returns a tuple of all returned rows or False on failure
+- `webframe.data.query(query_string, *args)` runs a query (False on failure) whose results can be accessed through `webframe.data.getRow()` and `webframe.data.getAll()`
+- `webframe.data.getQuery(query_string, *args)` returns a tuple of all returned rows or False on failure
 - Rows are returned as dicts, with common types parsed
 - Prepared-esque queries supported-- The query string is parsed by webframe.util.template()
 - Supports sanitation by escaping backslashes and double quotes in templated items. *Only use double-quotes in your queries.*
