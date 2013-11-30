@@ -92,6 +92,7 @@ def site():
 import data, cookie, auth, util
 
 def setup(instance=None):
+	import urllib
 	global hostname, pathkeys, docroot, form, params, debugging, debugMsgs, permission, documentTitle, documentScripts, rawScript, documentCss, documentContent, documentErrors, headers, responseCode, wserv
 	
 	debugging = False
@@ -114,7 +115,6 @@ def setup(instance=None):
 	headers['Content-type'] = 'text/plain;charset=utf-8'
 	wserv = False
 	if instance is not None and 'WEBFRAME_SERVER' in os.environ:
-		import urllib
 		wserv = instance
 		hostname = os.environ['WEBFRAME_SERVER']
 		if len(hostname) > 4 and hostname[:4] == 'dev.':
@@ -142,10 +142,10 @@ def setup(instance=None):
 		if len(hostname) > 4 and hostname[:4] == 'dev.':
 			enableDebug()
 		pathkeys = (os.environ['REDIRECT_URL'] if 'REDIRECT_URL' in os.environ else os.environ['REQUEST_URI'] if 'REQUEST_URI' in os.environ else '')[1:]
+		pathkeys = urllib.unquote_plus(pathkeys)
 		pathkeys = pathkeys.split('?', 1)[0].split('/')
 		if pathkeys[-1] == '':
 			pathkeys = pathkeys[:-1]
-		pathkeys = urllib.unquote_plus(pathkeys)
 		docroot = 'http://' + hostname
 		if os.environ['SERVER_PORT'] != '80':
 			docroot += ':' + os.environ['SERVER_PORT']
