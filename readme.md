@@ -63,9 +63,9 @@ Webframe has an easy-to-use templating system. Here is an overview of its featur
 - `webframe.util.template( (<template string> | <path to template file>), <content dict>, cache=False)`
 - `{{keyname}}` will be replaced with `value` if the dict contains `'keyname': 'value'`
 - `{{~if auth=admin}}Controls{{~elif auth}}Logged in{{~else}}Anonymous{{~endif}}` yields different values depending on the value of `auth` in the content dict
--- All values are truthy except for `False`, `"False"`, `None`, `0`, and `''`
--- `{{~if}}` blocks do not nest
--- No logical operations or tests other than equality are supported
+    - All values are truthy except for `False`, `"False"`, `None`, `0`, and `''`
+    - `{{~if}}` blocks do not nest
+    - No logical operations or tests other than equality are supported
 - If you're loading the same template file many times, set the third argument to `True` to cache its value
 
 Databases
