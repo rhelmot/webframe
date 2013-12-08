@@ -131,9 +131,7 @@ def setup(instance=None):
 		environ={'QUERY_STRING': ppath.query, 'REQUEST_METHOD':instance.command, 'CONTENT_TYPE' if 'Content-Type' in instance.headers else 'blagralkdfs':instance.headers.get('Content-Type') if 'Content-Type' in instance.headers else ''}
 		form = cgi.FieldStorage(fp=instance.rfile, headers=instance.headers if instance.command == 'POST' else None, environ=environ, keep_blank_values=1)
 		params = form
-		print params
 		params = {a: urllib.unquote(form[a].value) for a in form.keys() if not form[a].filename}
-		print params
 		if 'cookie' in instance.headers:
 			os.environ['HTTP_COOKIE'] = instance.headers['cookie']
 			cookie.reload()

@@ -13,12 +13,12 @@ Webframe is designed to run either behind apache as Python CGI or as its own ser
 
 - Each site runs out of a folder and all nondata requests are served by index.py
 - Each site has a `data/` folder which contains the static data needed for rendering the site, with the exception of the data/user folder which can hold file uploads and such.
-- `data/lib` is symlinked to a basic library that you can reuse for all your sites, containing at the very least a python/ directory (added to your pythonpath at runtime) which contains the webframe package.
+- `data/lib` is symlinked to a basic library that you can reuse for all your sites.
 - MySQL as the database
 - You work seperately from your servers and update them through git
 
-Setup
------
+Setup (Apache/CGI)
+------------------
 
 Do the following on the server side:
 - Make your standard `lib/` directory somewhere
@@ -32,7 +32,23 @@ And then for each website you set up:
 - Input any inforation it asks you for
 - When it finishes, you can clone your repository with the line it gives you. If you want to be able to test your site locally, be sure to repeat the `lib/python/webframe` directory-creating step!
 
-If you plan on using databases, please remote the `'dutcher_'+` bit on line 9 of `auth.py`. I use shared hosting and all my databases start with that, so it's convenient to have that in there.
+Setup (Standalone)
+------------------
+
+*At the moment, this is pretty darned unstable. Use at your own risk.*
+
+Do the following on the server side:
+- Make a folder for everything
+- Clone this repository: `git clone https://github.com/rhelmot/webframe.git`
+
+And then for each website you set up:
+- Make a folder for each domain you'd like to host
+- `cd` to that folder
+- Run the following: `../webframe_init.sh`
+- Input any information it asks you for
+- When it finishes, you can clonse your repository with the line it gives you. If you want to be able to test your site locally, you can just set up the server locally!
+
+To start the server, run `sudo python server.py`
 
 Templating
 ----------

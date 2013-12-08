@@ -21,8 +21,14 @@ ln -s ../$WEBFLIBPATH data/lib
 # generate base functionality files
 echo "Generating base-functionality files..."
 
+echo -n "[INPUT] Python 2.7 executable: [/usr/bin/python] "
+read WEBFPYPATH
+if [ "$WEBFPYPATH" == "" ]; then
+	WEBFPYPATH=/usr/bin/python
+fi
+
 echo "-index.py"
-echo -n "#!/opt/python27/bin/python2.7
+echo -n "#!$WEBFPYPATH
 # -*- coding: utf-8 -*-
 #  index.py
 
