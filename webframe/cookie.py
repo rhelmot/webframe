@@ -1,14 +1,13 @@
 # cookies. why did it have to be cookies.
 # Wdy, DD-Mon-YYYY HH:MM:SS GMT ==> strftime('%a, %d-%b-%Y %H:%M:%S GMT')
 
-import urllib, os, datetime
-cookies = {}
-def reload():
-	global cookies
-	if 'HTTP_COOKIE' in os.environ:
-		cookies = {urllib.unquote_plus(item.split('=', 1)[0]): urllib.unquote_plus(item.split('=', 1)[1]) for item in os.environ['HTTP_COOKIE'].split('; ')}
-reload()
+import urllib, datetime
 
+cookies = {}
+
+def init(cookiestring):
+	global cookies
+	cookies = {urllib.unquote_plus(item.split('=', 1)[0]): urllib.unquote_plus(item.split('=', 1)[1]) for item in cookiestring.split('; ')}
 	
 def setCookie(name, value, expires=False, path='/', domain=False, comment=False):
 	cookies[name] = value

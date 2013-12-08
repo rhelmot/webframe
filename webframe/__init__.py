@@ -1,7 +1,4 @@
-import cgi, os, urlparse
-
-
-
+import cgi, os, urlparse, urllib
 
 def enableDebug():
 	global debugging
@@ -41,6 +38,39 @@ def addError(message):
 	global documentErrors
 	documentErrors += [message]
 
+DEBUGHTML = '''<div id="pyGenDebug" style="
+			position: fixed;
+			bottom: 20px;
+			left: 20px;
+			right: 20px;
+			height: 20%;
+			overflow-y: scroll;
+			z-index: 20;
+			background-color:#FFFF70;
+			color: black;
+			border: solid 3px #FFC000; 
+			margin: 50px; 
+			padding: 50px;" 
+		onclick="
+			document.getElementById('pyGenDebug').style.display = 'none';">
+	Debug data:<br /><br />
+	<strong>%s</strong><br /><br />
+	Click this box to close it.</div>'''
+
+ERRORHTML = '''<div id="pyGenError" style="
+			background-color:pink; 
+			color: black; 
+			border: solid 3px red; 
+			margin: 50px; 
+			padding: 50px;" 
+		onclick="
+			document.getElementById(\pyGenError').style.display = 'none';
+			document.getElementById('pyGenDoc').style.display= 'block';">
+	The following errors were encountered while rendering this document:<br /><br />
+	<strong>%s+</strong><br /><br />
+	Click this box to display the (potentially incorrectly) rendered page.</div>
+	<div id="pyGenDoc" style="display: none;">'''
+
 def site():
 	global documentTitle, documentScripts, rawScript, documentCss, documentContent, documentErrors, headers, debugging, debugMsgs, docroot, responseCode
 	addRawScript('var basePath = "' + docroot[:-1] + '";')
@@ -55,11 +85,10 @@ def site():
 		outdata += ''.join(['<script src="'+a+'"></script>\n' for a in documentScripts])
 		outdata += ''.join(['<link rel="stylesheet" type="text/css" href="'+a+'" />' for a in documentCss])
 		outdata += '</head>\n<body>'
-		#debugging = True;
 		if debugging and len(debugMsgs) != 0:
-			outdata += '<div id="pyGenDebug" style="position: fixed; bottom: 20px; left: 20px; right: 20px; height: 20%; overflow-y: scroll; z-index: 20; background-color:#FFFF70; color: black; border: solid 3px #FFC000; margin: 50px; padding: 50px;" onclick="document.getElementById(\'pyGenDebug\').style.display = \'none\';">Debug data:<br /><br /><strong>'+'<br />'.join(debugMsgs)+'</strong><br /><br />Click this box to close it.</div>'
+			outdata += DEBUGHTML % '<br />'.join(debugMsgs)
 		if len(documentErrors) != 0:
-			outdata += '<div id="pyGenError" style="background-color:pink; color: black; border: solid 3px red; margin: 50px; padding: 50px;" onclick="document.getElementById(\'pyGenError\').style.display = \'none\'; document.getElementById(\'pyGenDoc\').style.display= \'block\';">The following errors were encountered while rendering this document:<br /><br /><strong>'+'<br />'.join(documentErrors)+'</strong><br /><br />Click this box to display the (potentially incorrectly) rendered page.</div><div id="pyGenDoc" style="display: none;">'
+			outdata += ERRORHTML % '<br />'.join(documentErrors)
 		outdata += documentContent
 		if len(documentErrors) != 0:
 			outdata += '</div>'
@@ -67,8 +96,8 @@ def site():
 	else:
 		outdata = documentContent
 	addHeader('Content-length', len(outdata))
-	addHeader('Connection', 'Close')
 	if wserv:
+		addHeader('Connection', 'Close')
 		wserv.send_response(int(responseCode))
 		for key, val in headers.iteritems():
 			wserv.send_header(key, val)
@@ -82,7 +111,6 @@ def site():
 		else:
 			print documentContent
 		return
-	
 	if wserv:
 		wserv.wfile.write(outdata)
 	else:
@@ -91,10 +119,30 @@ def site():
 
 import data, cookie, auth, util
 
-def setup(instance=None):
-	import urllib
-	global hostname, pathkeys, docroot, form, params, debugging, debugMsgs, permission, documentTitle, documentScripts, rawScript, documentCss, documentContent, documentErrors, headers, responseCode, wserv
-	
+def setupSwitch(sdata=None):
+	global wserv
+	wserv = None
+	if sdata is not None:
+		wserv, host, port = sdata
+		environ={
+			'QUERY_STRING': urlparse.urlparse(wserv.path).query, 
+			'REQUEST_METHOD': wserv.command, 
+			'CONTENT_TYPE' if 'Content-Type' in wserv.headers else 'blagralkdfs': wserv.headers.get('Content-Type') if 'Content-Type' in wserv.headers else ''
+		}
+		form = cgi.FieldStorage(fp=wserv.rfile, headers=wserv.headers if wserv.command == 'POST' else None, environ=environ, keep_blank_values=1)
+		if 'cookie' not in wserv.headers:
+			wserv.headers['cookie'] = ''
+		setup(host, wserv.path, port, wserv.command, form, wserv.headers['cookie'])
+	elif 'SERVER_NAME' in os.environ:
+		host = os.environ['SERVER_NAME']
+		path = (os.environ['REDIRECT_URL'] if 'REDIRECT_URL' in os.environ else os.environ['REQUEST_URI'] if 'REQUEST_URI' in os.environ else '')[1:]
+		form = cgi.FieldStorage(keep_blank_values=1)
+		setup(host, path, os.environ['SERVER_PORT'], os.environ['REQUEST_METHOD'], form, os.environ['HTTP_COOKIE'])
+	else:
+		setup()
+
+def setup(host='localhost', path='/', port=80, rmethod='GET', rform=None, cookiestring=''):
+	global hostname, pathkeys, docroot, form, params, debugging, debugMsgs, permission, documentTitle, documentScripts, rawScript, documentCss, documentContent, documentErrors, headers, responseCode, method
 	debugging = False
 	debugMsgs = []
 
@@ -106,52 +154,30 @@ def setup(instance=None):
 	documentContent = ''
 	documentErrors = []
 	headers = {}
-
-	docroot = '/'
-	pathkeys = []
-	hostname = 'localhost'
-
+	
 	responseCode = '200'
 	headers['Content-type'] = 'text/plain;charset=utf-8'
-	wserv = False
-	if instance is not None and 'WEBFRAME_SERVER' in os.environ:
-		wserv = instance
-		hostname = os.environ['WEBFRAME_SERVER']
-		if len(hostname) > 4 and hostname[:4] == 'dev.':
-			enableDebug()
-		ppath = urlparse.urlparse(instance.path)
-		pathkeys = ppath.path.split('/')[1:]
-		if pathkeys[-1] == '':
-			pathkeys = pathkeys[:-1]
-		pathkeys = map(urllib.unquote_plus, pathkeys)
-		docroot = 'http://' + hostname
-		if os.environ['SERVER_PORT'] != '80':
-			docroot += ':' + os.environ['SERVER_PORT']
-		docroot += '/'
-		environ={'QUERY_STRING': ppath.query, 'REQUEST_METHOD':instance.command, 'CONTENT_TYPE' if 'Content-Type' in instance.headers else 'blagralkdfs':instance.headers.get('Content-Type') if 'Content-Type' in instance.headers else ''}
-		form = cgi.FieldStorage(fp=instance.rfile, headers=instance.headers if instance.command == 'POST' else None, environ=environ, keep_blank_values=1)
-		params = form
+	
+	hostname = host
+	method = rmethod
+	if hostname.startswith('dev.'):
+		enableDebug()
+	pathkeys = map(urllib.unquote_plus, path.split('?',1)[0].split('/'))
+	while len(pathkeys) > 0 and pathkeys[0] == '':
+		pathkeys = pathkeys[1:]
+	while len(pathkeys) > 0 and pathkeys[-1] == '':
+		pathkeys = pathkeys[:-1]
+	docroot = 'http://' + hostname
+	if int(port) != 80:
+		docroot += ':' + str(port)
+	docroot += '/'
+	if rform is not None:
+		form = rform
 		params = {a: urllib.unquote(form[a].value) for a in form.keys() if not form[a].filename}
-		if 'cookie' in instance.headers:
-			os.environ['HTTP_COOKIE'] = instance.headers['cookie']
-			cookie.reload()
-	elif 'SERVER_NAME' in os.environ:
-		hostname = os.environ['SERVER_NAME']
-		if len(hostname) > 4 and hostname[:4] == 'dev.':
-			enableDebug()
-		pathkeys = (os.environ['REDIRECT_URL'] if 'REDIRECT_URL' in os.environ else os.environ['REQUEST_URI'] if 'REQUEST_URI' in os.environ else '')[1:]
-		pathkeys = urllib.unquote_plus(pathkeys)
-		pathkeys = pathkeys.split('?', 1)[0].split('/')
-		if pathkeys[-1] == '':
-			pathkeys = pathkeys[:-1]
-		docroot = 'http://' + hostname
-		if os.environ['SERVER_PORT'] != '80':
-			docroot += ':' + os.environ['SERVER_PORT']
-		docroot += '/'
-		form = cgi.FieldStorage(keep_blank_values=1)
-		params = {a: form[a].value for a in form.keys() if not form[a].filename}
+	if cookiestring != '':
+		cookie.init(cookiestring)
 
-setup()
+setupSwitch()
 
 ###DEPRECATED FUNCTIONS
 

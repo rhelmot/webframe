@@ -32,6 +32,12 @@ And then for each website you set up:
 - Input any inforation it asks you for
 - When it finishes, you can clone your repository with the line it gives you. If you want to be able to test your site locally, be sure to repeat the `lib/python/webframe` directory-creating step!
 
+Here's a basic test to see if you can run webframe:
+- Clone this repository
+- Add `127.0.0.1 example.com` to /etc/hosts
+- Run `server.py`
+- Load http://example.com
+
 Setup (Standalone)
 ------------------
 

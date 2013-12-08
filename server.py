@@ -60,14 +60,14 @@ class HandlerClass (BaseHTTPServer.BaseHTTPRequestHandler):
 				else:
 					self.basic_response(404, '404 Not Found\r\n\r\nThe file you requested does not exist.')
 				return
-		os.environ['WEBFRAME_SERVER'] = host
-		os.environ['SERVER_PORT'] = hostport
+		import webframe
 		try:
-			import webframe
 			if globalargs['debug']:
 				reload(webframe)
-			webframe.setup(self)
-			if not hostpath == '':
+			webframe.setupSwitch((self, host, hostport))
+			if hostpath != '':
+				if '.' not in sys.path:
+					sys.path.append('.')
 				os.chdir(hostpath)
 			import index
 			if globalargs['debug']:
