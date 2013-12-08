@@ -1,0 +1,62 @@
+/* Main CSS document */
+
+html, body {
+	height: 100%;
+	margin: 0px;
+	padding: 0px;
+}
+
+body {
+	background-color: #DDD;
+	font-family: sans-serif;
+	color: black;
+	text-align: center;
+}
+
+#container {
+	min-height: 100%;
+	height: auto !important;
+	height: 100%;
+	margin-bottom: -3em;
+}
+
+header {
+	display: inline-block;
+	font-size: 4em;
+	color: #333;
+	margin-bottom: 20px;
+}
+
+main {
+	display: block;
+	margin: 0px auto 20px;
+	background-color: white;
+	padding: 10px;
+	border-radius: 7px;
+	width: 40%;
+	min-width: 400px;
+	text-align: left;
+}
+
+a {
+	color: #444;
+	text-decoration: none;
+}
+a:visited { color: #555; }
+a:hover {
+	color: #333;
+	text-decoration: underline;
+}
+a:active { color: #222; }
+
+#push { height: 3em; }
+
+footer {
+	display: block;
+	font-size: .6em;
+	color: #888;
+	background-color: white;
+	padding: 2em 0px;
+	width: 100%;
+	height: 1em;
+}
