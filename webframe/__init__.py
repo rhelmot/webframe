@@ -157,6 +157,8 @@ def setup(host='localhost', path='/', port=80, rmethod='GET', rform=None, cookie
 	
 	responseCode = '200'
 	headers['Content-type'] = 'text/plain;charset=utf-8'
+	form = {}
+	params = {}
 	
 	hostname = host
 	method = rmethod
