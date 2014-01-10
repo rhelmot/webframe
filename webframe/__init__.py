@@ -137,6 +137,8 @@ def setupSwitch(sdata=None):
 		host = os.environ['SERVER_NAME']
 		path = (os.environ['REDIRECT_URL'] if 'REDIRECT_URL' in os.environ else os.environ['REQUEST_URI'] if 'REQUEST_URI' in os.environ else '')[1:]
 		form = cgi.FieldStorage(keep_blank_values=1)
+		if not 'HTTP_COOKIE' in os.environ:
+			os.environ['HTTP_COOKIE'] = ''
 		setup(host, path, os.environ['SERVER_PORT'], os.environ['REQUEST_METHOD'], form, os.environ['HTTP_COOKIE'])
 	else:
 		setup()
