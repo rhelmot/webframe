@@ -1,9 +1,19 @@
 # auth.py - authentication functions for Webframe
 #
-# Copyright 2013 Andrew Dutcher
+# Copyright 2014 Andrew Dutcher
 
+import webframe
 import time, math, os, hashlib
 from Crypto.Cipher import AES
+
+hashes = ['rmd320', 'sha3', 'rmd160', 'sha1', 'sha512', 'md5']
+
+def basichash(x):
+	if hashes == []:
+		return x
+	a = hashlib.new(hashes[0])
+	a.update(x)
+	return a.hexdigest()
 
 second = 1
 minute = 60*second
@@ -14,14 +24,26 @@ month = 30*day
 year = 365*day
 
 timeout = hour
+keyfile = 'data/sensitive/ckeys'
 
 try:
-	with open('data/sensitive/ckeys') as fd:
-		secretServerKey = fd.readline()[:-1]
-		otherServerKey = fd.readline()[:-1]
+	loadKeys(keyfile)
 except:
 	secretServerKey = '0123456789ABCDEF'
 	otherServerKey = 'FEDCBA9876543210'
+
+while True:
+	try:
+		basichash('asdf')
+		break
+	except:
+		hashes = hashes[1:]
+
+def loadKeys(keyfile):
+	global secretServerKey, otherServerKey
+	with open(keyfile) as fd:
+		secretServerKey = fd.readline()[:-1]
+		otherServerKey = fd.readline()[:-1]
 
 def genTokenSimple(tokenString):
 	return AES.new(ipv4Key(), AES.MODE_CBC, secretServerKey).encrypt(timeStr() + pad16(tokenString)).encode('base64')[:-1].encode('rot13')
@@ -50,10 +72,10 @@ def timeStr():
 	return tint
 
 def ipv4Int():
-    if 'REMOTE_ADDR' not in os.environ:
+    if webframe.remoteAddress is None:
         return 0xFFFFFFFF
     else:
-        return sum(int(byte) << (8 * (3-i)) for i, byte in enumerate(os.environ['REMOTE_ADDR'].split('.')))
+        return sum(int(byte) << (8 * (3-i)) for i, byte in enumerate(webframe.remoteAddress.split('.')))
 
 def ipv4Key():
 	ipint = ipv4Int()
@@ -80,7 +102,7 @@ def unpad(text):
 	return text[:-padding_length]
 
 def saltHash(text):
-	return hashlib.md5('q9' + text + '37a\n').hexdigest()
+	return basichash('q9' + text + '37a\n')
 
 def xor(string, key):
 	o = ''

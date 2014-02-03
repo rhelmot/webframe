@@ -1,3 +1,7 @@
+# __init__.py - Initializaion functions for Webframe
+#
+# Copyright 2014 Andrew Dutcher
+
 import cgi, os, urlparse, urllib
 
 def enableDebug():
@@ -132,19 +136,19 @@ def setupSwitch(sdata=None):
 		form = cgi.FieldStorage(fp=wserv.rfile, headers=wserv.headers if wserv.command == 'POST' else None, environ=environ, keep_blank_values=1)
 		if 'cookie' not in wserv.headers:
 			wserv.headers['cookie'] = ''
-		setup(host, wserv.path, port, wserv.command, form, wserv.headers['cookie'])
-	elif 'SERVER_NAME' in os.environ:
+		setup(host, wserv.path, port, wserv.command, wserv.client_address[0], form, wserv.headers['cookie'], )
+	elif 'GATEWAY_INTERFACE' in os.environ:
 		host = os.environ['SERVER_NAME']
 		path = (os.environ['REDIRECT_URL'] if 'REDIRECT_URL' in os.environ else os.environ['REQUEST_URI'] if 'REQUEST_URI' in os.environ else '')[1:]
 		form = cgi.FieldStorage(keep_blank_values=1)
 		if not 'HTTP_COOKIE' in os.environ:
 			os.environ['HTTP_COOKIE'] = ''
-		setup(host, path, os.environ['SERVER_PORT'], os.environ['REQUEST_METHOD'], form, os.environ['HTTP_COOKIE'])
+		setup(host, path, os.environ['SERVER_PORT'], os.environ['REQUEST_METHOD'], os.environ['REMOTE_ADDR'], form, os.environ['HTTP_COOKIE'])
 	else:
 		setup()
 
-def setup(host='localhost', path='/', port=80, rmethod='GET', rform=None, cookiestring=''):
-	global hostname, pathkeys, docroot, form, params, debugging, debugMsgs, permission, documentTitle, documentScripts, rawScript, documentCss, documentContent, documentErrors, headers, responseCode, method
+def setup(host='localhost', path='/', port=80, rmethod='GET', remoteaddr=None, rform=None, cookiestring=''):
+	global hostname, pathkeys, docroot, form, params, debugging, debugMsgs, permission, documentTitle, documentScripts, rawScript, documentCss, documentContent, documentErrors, headers, responseCode, method, remoteAddress
 	debugging = False
 	debugMsgs = []
 
@@ -164,6 +168,7 @@ def setup(host='localhost', path='/', port=80, rmethod='GET', rform=None, cookie
 	
 	hostname = host
 	method = rmethod
+	remoteAddress = remoteaddr
 	if hostname.startswith('dev.'):
 		enableDebug()
 	pathkeys = map(urllib.unquote_plus, path.split('?',1)[0].split('/'))
